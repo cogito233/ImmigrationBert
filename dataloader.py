@@ -41,7 +41,7 @@ class DataFilter(object):
 
 
 class DataLoader(object):
-    def __init__(self, cfg, mode = 'train'):
+    def __init__(self, cfg, mode = 'normal'):
         dataset = load_dataset('csv', data_files=['./data/dat_speeches_043114_immi_h_ascii_07212021.csv', 
                                                             './data/dat_speeches_043114_immi_s_ascii_07202021.csv'])
         dataset_label=load_dataset('csv', data_files=['./data/hand_coding_task_house_1000_07162021_lite.csv',
@@ -50,15 +50,22 @@ class DataLoader(object):
         filter = DataFilter(dataset, cfg)
         raw_datasets = dataset_label.map(filter, batched=False)
         self.train = None
+        self.dev = None
         self.test = None
-        
-        if (mode == 'train'):
-            raw_datasets.shuffle()
+
+        # used to search for hyperparameters
+        if (mode == '5-cross-train'):
+            raw_datasets.shuffle(seed=1)
             self.generate_5fold_cross_validation(raw_datasets)
-        if (mode == 'inference'):
-            self.train, self.test = raw_datasets['train'], None
+        # use the whole datast and inference the raw data
+        if (mode == '5-cross-inference'):
+            self.train = raw_datasets['train']
+        if (mode == 'normal'):
+            raw_datasets.shuffle()
+            sub_dataset = [raw_datasets['train'].shard(num_shards =10 , index = i) for i in range(10)]
+            self.train, self.test, self.dev = datasets.concatenate_datasets([sub_dataset[j] for j in range(8)]), sub_dataset[8], sub_dataset[9]
         
-    # 对数据集进行拆分
+    # Prepare data sets for the five training sessions
     def generate_5fold_cross_validation(self, raw_datasets):
         self.train, self.test = [None]*5, [None]*5
         sub_dataset = [raw_datasets['train'].shard(num_shards =5 , index = i) for i in range(5)]
@@ -69,9 +76,10 @@ class DataLoader(object):
 
 def test():
     from config import cfg
-    dataset = DataLoader(cfg, mode = 'train')
+    dataset = DataLoader(cfg, mode = '5-cross-inference')
     print(dataset.train)
     print(dataset.test)
+    print(dataset.dev)
 
 
 if __name__=='__main__':

@@ -4,6 +4,5 @@ cfg = dict(
     TASK = 'immiggration',
     CHECKPOINT = '',
     LR = 5e-5,
-    DROPOUT= 0,
     LABEL_LIST = ['unimmigration', 'immigration'],
 )

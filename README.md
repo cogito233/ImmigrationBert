@@ -28,7 +28,7 @@ I have got two dataset dat_speeches1 contains **42540** samples and dat_speeches
 | not immigration | 874           |
 | Total           | 2000          |
 
-Then, we split the samples into train (1600), validation (200), test (200) sets.
+Then, we split the samples into train (1600), test (400) sets.
 
 Total unseen samples without label is **74894**.
 
@@ -48,6 +48,10 @@ $ python main.py
 ~~~
 
 ### Parameters choosing ####
+```
+Total F1 with different epoch:
+[0.8413492  0.8449074  0.83221459 0.84260191 0.84249589 0.83636347 0.8466556  0.84623581 0.84578887 0.84556199]
+```
 
 ```
 Learning-rate = [5e-5]
@@ -63,7 +67,14 @@ Batch size = [16]
 Standalone Distilbert-base result base on test data.
 
 ```
-# TODO
+               precision    recall  f1-score   support
+
+unimmigration       0.83      0.77      0.80        91
+  immigration       0.82      0.87      0.84       109
+
+     accuracy                           0.82       200
+    macro avg       0.83      0.82      0.82       200
+ weighted avg       0.83      0.82      0.82       200
 ```
 
 # <span style="color: red"> THE WORK IS IN PROGRESS </span>

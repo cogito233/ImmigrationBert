@@ -1,19 +1,21 @@
-from config import cfg
 from dataloader import DataLoader, DataFilter
-from eval import compute_metrics
-from bert import build_model
+from eval import EvalClass
+from bert import build_model, save_model, save_final_model, load_model
 from icecream import ic
 from transformers import TrainingArguments, Trainer
 from transformers import AutoTokenizer
 from datasets import load_dataset
+from utils import set_seed
+from config import cfg
 
 import numpy as np
 import pandas as pd
 
 label_list = cfg['LABEL_LIST']
 
-def test_model():
-    dataset = DataLoader(cfg)
+def test_model_5_cross():
+    set_seed()
+    dataset = DataLoader(cfg, mode = '5-cross-train')
     # tokenizer = AutoTokenizer.from_pretrained(cfg['MODEL_NAME'])
     # data_collator = DataCollatorForTokenClassification(tokenizer)
     args =  TrainingArguments(
@@ -21,10 +23,11 @@ def test_model():
         evaluation_strategy = "epoch",
         per_device_train_batch_size=cfg['BATCH_SIZE'],
         per_device_eval_batch_size=cfg['BATCH_SIZE'],
-        num_train_epochs=3,
+        num_train_epochs=10,
+        learning_rate = cfg['LR'],
         weight_decay=0.01,
     )
-
+    evalClass = [EvalClass() for i in range(5)]
     for i in range(5):
         model = build_model(label_list, cfg)
         trainer = Trainer(
@@ -32,7 +35,7 @@ def test_model():
             args,
             train_dataset = dataset.train[i],
             eval_dataset = dataset.test[i],
-            compute_metrics=compute_metrics
+            compute_metrics=evalClass[i].compute_metrics
         )
         """    data_collator = data_collator,
             tokenizer = tokenizer,
@@ -40,27 +43,70 @@ def test_model():
         )"""
         trainer.train()
         trainer.evaluate()
+        del model
+        print(evalClass[i].f1)
+    a=np.array([0,0,0,0,0,0,0,0,0,0,0],dtype='float64')
+    for i in range(5):
+        print(evalClass[i].f1)
+        a+=np.array(evalClass[i].f1)
+    print("Total F1:")
+    print(a/5)
 
-def train_final_model():
+def  train_5_cross_final_model():
     model = build_model(label_list, cfg)
-    dataset = DataLoader(cfg, mode = 'inference')
+    dataset = DataLoader(cfg, mode = '5-cross-inference')
+    args =  TrainingArguments(
+        f"model-5-cross-{cfg['TASK']}-final",
+        evaluation_strategy = "no",
+        per_device_train_batch_size=cfg['BATCH_SIZE'],
+        per_device_eval_batch_size=cfg['BATCH_SIZE'],
+        num_train_epochs=3,
+        learning_rate = cfg['LR'],
+        weight_decay=0.01,
+    )
+    trainer = Trainer(model, args, train_dataset = dataset.train)
+    trainer.train()
+    save_final_model(trainer.model)
+    # processRawData(trainer)
+
+def train_normal():
+    # TODO
+    #set_seed()
+    evalClass = EvalClass() 
+    model = build_model(label_list, cfg)
+    dataset = DataLoader(cfg, mode = 'normal')
     # tokenizer = AutoTokenizer.from_pretrained(cfg['MODEL_NAME'])
     # data_collator = DataCollatorForTokenClassification(tokenizer)
     args =  TrainingArguments(
         f"test-{cfg['TASK']}-final",
+        evaluation_strategy = "epoch",
         per_device_train_batch_size=cfg['BATCH_SIZE'],
         per_device_eval_batch_size=cfg['BATCH_SIZE'],
         num_train_epochs=3,
-        weight_decay=0.01
+        learning_rate = cfg['LR'],
+        weight_decay=0.01,
+        # save_steps=100
     )
-    trainer = Trainer(model, args, train_dataset = dataset.train)
+    trainer = Trainer(model,args,train_dataset = dataset.train,eval_dataset = dataset.dev,compute_metrics=evalClass.compute_metrics)
     trainer.train()
-    processRawData(trainer)
-    # 保存预测结果
+    maxacc = np.max(np.array(evalClass.acc))
+    pos = np.argmax(np.array(evalClass.acc))
+    print(f"maxacc is {maxacc}, in the epoch {pos+1}")
+    del model
+    model = build_model(label_list, cfg)
+    load_model(model, pos)
+    print("evaluating in test dataset...")
+    trainer = Trainer(model,args,train_dataset = dataset.train,eval_dataset = dataset.test,compute_metrics=evalClass.compute_metrics)
+    trainer.evaluate()
+    save_final_model(model)
+    # processRawData(trainer)
 
+
+# to save the inference result of raw data
 def processRawData(trainer):
     tokenizer = AutoTokenizer.from_pretrained(cfg['MODEL_NAME'])
     def filterRawData(example):
+        # for single line of data, return a tokenized version
         tokenized_inputs = tokenizer(example['text'],padding="max_length" , truncation=True)
         tokenized_inputs["label"] = 0
         tokenized_inputs['doc_id'] = example['doc_id']
@@ -82,4 +128,4 @@ def Calc_and_Save(trainer, dataset, outdir):
     df.to_csv(outdir,sep = ',',index=False) 
 
 if __name__=='__main__':
-    train_final_model()
+    train_5_cross_final_model()
