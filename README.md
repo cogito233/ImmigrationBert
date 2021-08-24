@@ -77,5 +77,19 @@ unimmigration       0.83      0.77      0.80        91
  weighted avg       0.83      0.82      0.82       200
 ```
 
+In the train set we got the accuracy 0.95:
+```
+               precision    recall  f1-score   support
+
+unimmigration       0.97      0.92      0.94       913
+  immigration       0.94      0.97      0.96      1087
+
+     accuracy                           0.95      2000
+    macro avg       0.95      0.95      0.95      2000
+ weighted avg       0.95      0.95      0.95      2000
+```
+
+You can get the model trained with this [link](https://drive.google.com/file/d/1mb4rjGvqeT8mHQ9xHv_Sbk7FQp9rKFR1/view?usp=sharing)
+(Do not really understand why it is so small)
 # <span style="color: red"> THE WORK IS IN PROGRESS </span>
 
