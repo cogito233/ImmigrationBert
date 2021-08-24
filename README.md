@@ -39,6 +39,11 @@ First clone this repo and move to the directory. Then, install necessary librari
 ~~~
 $ git clone https://github.com/cogito233/ImmigrationBert.git
 $ cd ImmigrationBert
+$ pip install -r requirements.txt
+$ huggingface-cli login
+$ apt install git-lfs
+$ git config --global user.email "you@example.com"
+$ git config --global user.name "Your Name"
 $ python main.py
 ~~~
 
