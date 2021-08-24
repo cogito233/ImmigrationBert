@@ -1,5 +1,8 @@
+Cython
 transformers
 datasets
 pandas
 icecream
 numpy
+torch
+sklearn
