@@ -89,7 +89,10 @@ unimmigration       0.97      0.92      0.94       913
  weighted avg       0.95      0.95      0.95      2000
 ```
 
-You can get the model trained with this [link](https://drive.google.com/file/d/1mb4rjGvqeT8mHQ9xHv_Sbk7FQp9rKFR1/view?usp=sharing)
+You can get the model trained with this [link](https://drive.google.com/file/d/1mb4rjGvqeT8mHQ9xHv_Sbk7FQp9rKFR1/view?usp=sharing), and you can load it by  `bert.load_final_model`.
+
+You can get the model with huggingface format with this [link](https://drive.google.com/drive/folders/1zl42mC4eSSxzRrRkshm-h47EIlvWXs2P?usp=sharing), and you can load it by `bert.load_with_huggingface_format`.
+
 (Do not really understand why it is so small)
 # <span style="color: red"> THE WORK IS IN PROGRESS </span>
 
