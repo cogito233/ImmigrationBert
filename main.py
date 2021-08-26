@@ -1,6 +1,6 @@
 from dataloader import DataLoader, DataFilter
 from eval import EvalClass
-from bert import build_model, save_model, save_final_model, load_model
+from bert import build_model, save_model, save_final_model, load_model, save_with_huggingface_format
 from icecream import ic
 from transformers import TrainingArguments, Trainer
 from transformers import AutoTokenizer
@@ -66,7 +66,7 @@ def  train_5_cross_final_model():
     )
     trainer = Trainer(model, args, train_dataset = dataset.train)
     trainer.train()
-    save_final_model(trainer.model)
+    save_with_huggingface_format(model,cfg)
     # processRawData(trainer)
 
 def train_normal():
@@ -98,7 +98,7 @@ def train_normal():
     print("evaluating in test dataset...")
     trainer = Trainer(model,args,train_dataset = dataset.train,eval_dataset = dataset.test,compute_metrics=evalClass.compute_metrics)
     trainer.evaluate()
-    save_final_model(model)
+    save_with_huggingface_format(model,cfg)
     # processRawData(trainer)
 
 

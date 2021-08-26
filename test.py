@@ -1,6 +1,6 @@
 from dataloader import DataLoader, DataFilter
 from eval import EvalClass
-from bert import load_final_model
+from bert import load_final_model, load_with_huggingface_format
 from icecream import ic
 from transformers import TrainingArguments, Trainer
 from transformers import AutoTokenizer
@@ -34,7 +34,7 @@ def inference_simple_text(text):
     import torch
     tokenizer = AutoTokenizer.from_pretrained(cfg['MODEL_NAME'])
     tokenized_inputs = tokenizer(text,padding="max_length", truncation=True)
-    model = load_final_model()
+    model = load_with_huggingface_format(cfg)
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     input_ids = torch.tensor([tokenized_inputs['input_ids']]).to(device)
     attention_mask = torch.tensor([tokenized_inputs['attention_mask']]).to(device)

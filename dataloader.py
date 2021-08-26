@@ -44,6 +44,7 @@ class DataLoader(object):
     def __init__(self, cfg, mode = 'normal'):
         dataset = load_dataset('csv', data_files=['./data/dat_speeches_043114_immi_h_ascii_07212021.csv', 
                                                             './data/dat_speeches_043114_immi_s_ascii_07202021.csv'])
+        print(dataset['train'][0])
         dataset_label=load_dataset('csv', data_files=['./data/hand_coding_task_house_1000_07162021_lite.csv',
                                                             './data/hand_coding_task_senate_1000_07032021_lite.csv'])
         # 清洗，合并数据集
@@ -76,7 +77,7 @@ class DataLoader(object):
 
 def test():
     from config import cfg
-    dataset = DataLoader(cfg, mode = '5-cross-inference')
+    dataset = DataLoader(cfg, mode = 'normal')
     print(dataset.train)
     print(dataset.test)
     print(dataset.dev)
